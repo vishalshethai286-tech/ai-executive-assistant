@@ -1,0 +1,412 @@
+// AI Executive Assistant - Prisma schema
+// Run `npx prisma migrate dev` against a Postgres database to apply.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Auth (NextAuth/Auth.js)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String? // for credentials login (hashed)
+
+  timezone       String  @default("UTC")
+  aiProvider     String  @default("mock") // "mock" | "openai" | "anthropic"
+  aiTone         String  @default("Professional")
+  role           String  @default("user") // "user" | "admin"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts            Account[]
+  sessions            Session[]
+  emails              EmailMessage[]
+  events              CalendarEvent[]
+  tasks               Task[]
+  followUps           FollowUp[]
+  contacts            Contact[]
+  notes               Note[]
+  meetingNotes        MeetingNote[]
+  aiLogs              AILog[]
+  memoryItems         MemoryItem[]
+  notifications       Notification[]
+  integrationAccounts IntegrationAccount[]
+  commandLogs         CommandLog[]
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Core domain models
+// ---------------------------------------------------------------------------
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  WAITING
+  DONE
+}
+
+enum TaskCategory {
+  WORK
+  PERSONAL
+  FOLLOW_UP
+  MEETING
+  FINANCE
+  ADMIN
+}
+
+enum FollowUpStatus {
+  PENDING
+  WAITING
+  COMPLETED
+  IGNORED
+}
+
+model EmailMessage {
+  id          String   @id @default(cuid())
+  userId      String
+  externalId  String? // Gmail message id, if synced
+  fromName    String
+  fromEmail   String
+  subject     String
+  snippet     String   @db.Text
+  body        String   @db.Text
+  receivedAt  DateTime
+  isUnread    Boolean  @default(true)
+  isImportant Boolean  @default(false)
+  isPriority  Boolean  @default(false)
+  label       String? // "waiting_reply" | "follow_up_needed" | etc
+  aiSummary   String?  @db.Text
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  followUps FollowUp[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, isUnread])
+  @@index([userId, isImportant])
+  @@index([contactId])
+}
+
+model CalendarEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  externalId  String?
+  title       String
+  description String?  @db.Text
+  location    String?
+  startsAt    DateTime
+  endsAt      DateTime
+  attendees   String[] @default([])
+  organizer   String?
+  notes       String?  @db.Text
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  meetingNotes MeetingNote[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, startsAt])
+  @@index([contactId])
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  userId      String
+  title       String
+  description String?      @db.Text
+  priority    Priority     @default(MEDIUM)
+  status      TaskStatus   @default(TODO)
+  category    TaskCategory @default(WORK)
+  dueDate     DateTime?
+  aiScore     Int? // AI-generated priority score 0-100
+  aiBreakdown String[]     @default([]) // AI generated subtasks
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  notes Note[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, dueDate])
+  @@index([contactId])
+}
+
+model FollowUp {
+  id          String         @id @default(cuid())
+  userId      String
+  personName  String
+  company     String?
+  context     String         @db.Text
+  lastContact DateTime?
+  dueDate     DateTime?
+  nextAction  String?        @db.Text
+  status      FollowUpStatus @default(PENDING)
+  aiMessage   String?        @db.Text
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  emailId String?
+  email   EmailMessage? @relation(fields: [emailId], references: [id])
+
+  notes Note[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, dueDate])
+  @@index([contactId])
+}
+
+model Contact {
+  id               String    @id @default(cuid())
+  userId           String
+  name             String
+  email            String?
+  company          String?
+  role             String?
+  phone            String?
+  notes            String?   @db.Text
+  lastInteraction  DateTime?
+  aiRelationshipSummary String? @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  emails    EmailMessage[]
+  events    CalendarEvent[]
+  tasks     Task[]
+  followUps FollowUp[]
+  notes_    Note[]
+  meetingNotes MeetingNote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, name])
+}
+
+model Note {
+  id              String   @id @default(cuid())
+  userId          String
+  title           String
+  content         String   @db.Text
+  aiSummary       String?  @db.Text
+  actionItems     String[] @default([])
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  taskId String?
+  task   Task? @relation(fields: [taskId], references: [id])
+
+  followUpId String?
+  followUp   FollowUp? @relation(fields: [followUpId], references: [id])
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([contactId])
+}
+
+model MeetingNote {
+  id               String   @id @default(cuid())
+  userId           String
+  title            String
+  attendees        String[] @default([])
+  discussionSummary String? @db.Text
+  decisions        String[] @default([])
+  actionItems      String[] @default([])
+  followUps        String[] @default([])
+  aiSummary        String?  @db.Text
+
+  eventId String?
+  event   CalendarEvent? @relation(fields: [eventId], references: [id])
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([eventId])
+}
+
+model AILog {
+  id           String   @id @default(cuid())
+  userId       String
+  function     String // e.g. "summarizeEmail", "generateDailyBriefing"
+  provider     String // "mock" | "openai" | "anthropic"
+  inputSummary String   @db.Text // redacted/short summary of input, not full sensitive content
+  outputSummary String  @db.Text
+  confidence   Float?
+  durationMs   Int?
+  success      Boolean  @default(true)
+  error        String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, function])
+  @@index([createdAt])
+}
+
+model MemoryItem {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String // "preference" | "person" | "commitment" | "writing_style" | "instruction" | "context"
+  label       String
+  content     String   @db.Text
+  isSensitive Boolean  @default(false)
+  source      String? // where it was learned from
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, type])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String // "task_due" | "follow_up_due" | "meeting_prep" | "important_email" | "daily_briefing"
+  title     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  link      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, isRead])
+}
+
+model IntegrationAccount {
+  id           String    @id @default(cuid())
+  userId       String
+  provider     String // "google_gmail" | "google_calendar" | "openai" | "anthropic"
+  status       String    @default("disconnected") // "connected" | "disconnected" | "error"
+  externalId   String?
+  scopes       String[]  @default([])
+  lastSyncedAt DateTime?
+  metadata     Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@unique([userId, provider])
+}
+
+model CommandLog {
+  id            String   @id @default(cuid())
+  userId        String
+  rawCommand    String   @db.Text
+  parsedIntent  String?
+  parameters    Json?
+  resultSummary String?  @db.Text
+  success       Boolean  @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
