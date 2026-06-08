@@ -21,7 +21,7 @@ export default async function AdminPage() {
       .catch(() => false),
   ]);
 
-  const failedAILogs = aiLogs.filter((l) => !l.success);
+  const failedAILogs = aiLogs.filter((l: (typeof aiLogs)[number]) => !l.success);
 
   return (
     <AdminBoard
