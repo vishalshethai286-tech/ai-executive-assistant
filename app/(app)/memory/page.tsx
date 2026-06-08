@@ -8,7 +8,7 @@ export default async function MemoryPage() {
 
   return (
     <MemoryBoard
-      items={items.map((m) => ({
+      items={items.map((m: (typeof items)[number]) => ({
         id: m.id,
         type: m.type,
         label: m.label,

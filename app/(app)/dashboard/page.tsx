@@ -49,10 +49,10 @@ export default async function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <BriefingCard
-            meetings={schedule.map((m) => ({ title: m.title, startsAt: m.startsAt.toISOString() }))}
-            importantEmails={urgentEmails.map((e) => ({ fromName: e.fromName, subject: e.subject }))}
-            pendingTasks={todayTasks.map((t) => ({ title: t.title, priority: t.priority }))}
-            followUpsDueToday={followUpsDueToday.map((f) => ({ personName: f.personName, nextAction: f.nextAction }))}
+            meetings={schedule.map((m: (typeof schedule)[number]) => ({ title: m.title, startsAt: m.startsAt.toISOString() }))}
+            importantEmails={urgentEmails.map((e: (typeof urgentEmails)[number]) => ({ fromName: e.fromName, subject: e.subject }))}
+            pendingTasks={todayTasks.map((t: (typeof todayTasks)[number]) => ({ title: t.title, priority: t.priority }))}
+            followUpsDueToday={followUpsDueToday.map((f: (typeof followUpsDueToday)[number]) => ({ personName: f.personName, nextAction: f.nextAction }))}
           />
 
           <Card>
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
                 <EmptyState icon={ListChecks} title="No tasks due today" description="Enjoy the breathing room, or get ahead on tomorrow." />
               ) : (
                 <ul className="space-y-2">
-                  {topPriorities.map((t) => (
+                  {topPriorities.map((t: (typeof topPriorities)[number]) => (
                     <li key={t.id} className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium">{t.title}</p>
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
                 <EmptyState icon={CalendarClock} title="Nothing on the calendar yet" />
               ) : (
                 <ul className="space-y-2">
-                  {upcoming.map((e) => (
+                  {upcoming.map((e: (typeof upcoming)[number]) => (
                     <li key={e.id} className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm">
                       <span className="font-medium">{e.title}</span>
                       <span className="text-muted-foreground">
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
                 <p className="text-sm text-muted-foreground">Inbox is calm right now.</p>
               ) : (
                 <ul className="space-y-2">
-                  {urgentEmails.map((e) => (
+                  {urgentEmails.map((e: (typeof urgentEmails)[number]) => (
                     <li key={e.id} className="rounded-lg border border-border px-3 py-2">
                       <p className="truncate text-sm font-medium">{e.subject}</p>
                       <p className="truncate text-xs text-muted-foreground">{e.fromName}</p>
@@ -167,7 +167,7 @@ export default async function DashboardPage() {
                 <p className="text-sm text-muted-foreground">Nothing due today.</p>
               ) : (
                 <ul className="space-y-2">
-                  {followUpsDueToday.map((f) => (
+                  {followUpsDueToday.map((f: (typeof followUpsDueToday)[number]) => (
                     <li key={f.id} className="rounded-lg border border-border px-3 py-2">
                       <p className="text-sm font-medium">{f.personName}</p>
                       <p className="truncate text-xs text-muted-foreground">{f.nextAction || f.context}</p>

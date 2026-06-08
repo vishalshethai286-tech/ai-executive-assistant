@@ -17,7 +17,7 @@ export default async function CalendarPage() {
   ]);
 
   const serialize = (items: typeof events) =>
-    items.map((e) => ({
+    items.map((e: (typeof items)[number]) => ({
       id: e.id,
       title: e.title,
       description: e.description,
@@ -34,7 +34,7 @@ export default async function CalendarPage() {
     <CalendarBoard
       events={serialize(events)}
       today={serialize(today)}
-      contacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+      contacts={contacts.map((c: (typeof contacts)[number]) => ({ id: c.id, name: c.name }))}
     />
   );
 }

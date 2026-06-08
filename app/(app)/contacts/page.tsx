@@ -30,7 +30,7 @@ export default async function ContactsPage({
 
   return (
     <ContactBoard
-      contacts={contacts.map((c) => ({
+      contacts={contacts.map((c: (typeof contacts)[number]) => ({
         id: c.id,
         name: c.name,
         email: c.email,

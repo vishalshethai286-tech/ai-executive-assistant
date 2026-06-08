@@ -14,7 +14,7 @@ export default async function TasksPage() {
   ]);
 
   const serialize = (tasks: typeof all) =>
-    tasks.map((t) => ({
+    tasks.map((t: (typeof tasks)[number]) => ({
       id: t.id,
       title: t.title,
       description: t.description,
@@ -34,7 +34,7 @@ export default async function TasksPage() {
       overdue={serialize(overdue)}
       today={serialize(today)}
       weekly={serialize(weekly)}
-      contacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+      contacts={contacts.map((c: (typeof contacts)[number]) => ({ id: c.id, name: c.name }))}
     />
   );
 }

@@ -36,7 +36,7 @@ export async function createEventAction(input: EventInput) {
   const event = await calendarService.createEvent(userId, parsed);
   revalidatePath("/calendar");
   revalidatePath("/dashboard");
-  return { event, conflicts: conflicts.map((c) => ({ id: c.id, title: c.title })) };
+  return { event, conflicts: conflicts.map((c: (typeof conflicts)[number]) => ({ id: c.id, title: c.title })) };
 }
 
 export async function updateEventAction(id: string, input: Partial<EventInput>) {

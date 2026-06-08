@@ -29,7 +29,7 @@ export default async function CommandCenterPage() {
           <CardDescription>Examples: {examples.slice(0, 3).join(" · ")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <CommandConsole examples={examples} history={history.map((h) => ({
+          <CommandConsole examples={examples} history={history.map((h: (typeof history)[number]) => ({
             id: h.id,
             rawCommand: h.rawCommand,
             parsedIntent: h.parsedIntent,

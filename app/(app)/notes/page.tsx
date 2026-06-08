@@ -13,7 +13,7 @@ export default async function NotesPage() {
 
   return (
     <NotesBoard
-      notes={notes.map((n) => ({
+      notes={notes.map((n: (typeof notes)[number]) => ({
         id: n.id,
         title: n.title,
         content: n.content,
@@ -22,7 +22,7 @@ export default async function NotesPage() {
         contactName: n.contact?.name ?? null,
         createdAt: n.createdAt.toISOString(),
       }))}
-      meetingNotes={meetingNotes.map((m) => ({
+      meetingNotes={meetingNotes.map((m: (typeof meetingNotes)[number]) => ({
         id: m.id,
         title: m.title,
         attendees: m.attendees,
@@ -35,7 +35,7 @@ export default async function NotesPage() {
         contactName: m.contact?.name ?? null,
         createdAt: m.createdAt.toISOString(),
       }))}
-      contacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+      contacts={contacts.map((c: (typeof contacts)[number]) => ({ id: c.id, name: c.name }))}
     />
   );
 }

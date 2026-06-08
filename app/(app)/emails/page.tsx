@@ -15,7 +15,7 @@ export default async function EmailsPage({
 
   return (
     <EmailInbox
-      emails={emails.map((e) => ({
+      emails={emails.map((e: (typeof emails)[number]) => ({
         id: e.id,
         fromName: e.fromName,
         fromEmail: e.fromEmail,

@@ -13,7 +13,7 @@ export default async function FollowUpsPage() {
   ]);
 
   const serialize = (items: typeof all) =>
-    items.map((f) => ({
+    items.map((f: (typeof items)[number]) => ({
       id: f.id,
       personName: f.personName,
       company: f.company,
@@ -32,7 +32,7 @@ export default async function FollowUpsPage() {
       all={serialize(all)}
       overdue={serialize(overdue)}
       dueToday={serialize(dueToday)}
-      contacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+      contacts={contacts.map((c: (typeof contacts)[number]) => ({ id: c.id, name: c.name }))}
     />
   );
 }

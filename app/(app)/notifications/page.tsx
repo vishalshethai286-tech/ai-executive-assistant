@@ -8,7 +8,7 @@ export default async function NotificationsPage() {
 
   return (
     <NotificationList
-      notifications={notifications.map((n) => ({
+      notifications={notifications.map((n: (typeof notifications)[number]) => ({
         id: n.id,
         type: n.type,
         title: n.title,

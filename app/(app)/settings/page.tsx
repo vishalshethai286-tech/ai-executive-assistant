@@ -15,7 +15,7 @@ export default async function SettingsPage() {
     prisma.integrationAccount.findMany({ where: { userId } }),
   ]);
 
-  const integrationStatus = (provider: string) => integrations.find((i) => i.provider === provider)?.status ?? "disconnected";
+  const integrationStatus = (provider: string) => integrations.find((i: (typeof integrations)[number]) => i.provider === provider)?.status ?? "disconnected";
 
   return (
     <SettingsBoard
