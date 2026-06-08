@@ -22,10 +22,10 @@ export default async function ContactsPage({
     notes: c.notes,
     lastInteraction: c.lastInteraction ? c.lastInteraction.toISOString() : null,
     aiRelationshipSummary: c.aiRelationshipSummary,
-    emails: c.emails.map((e) => ({ id: e.id, subject: e.subject, receivedAt: e.receivedAt.toISOString() })),
-    events: c.events.map((e) => ({ id: e.id, title: e.title, startsAt: e.startsAt.toISOString() })),
-    tasks: c.tasks.map((t) => ({ id: t.id, title: t.title, status: t.status })),
-    followUps: c.followUps.map((f) => ({ id: f.id, subject: f.personName, status: f.status })),
+    emails: c.emails.map((e: (typeof c.emails)[number]) => ({ id: e.id, subject: e.subject, receivedAt: e.receivedAt.toISOString() })),
+    events: c.events.map((e: (typeof c.events)[number]) => ({ id: e.id, title: e.title, startsAt: e.startsAt.toISOString() })),
+    tasks: c.tasks.map((t: (typeof c.tasks)[number]) => ({ id: t.id, title: t.title, status: t.status })),
+    followUps: c.followUps.map((f: (typeof c.followUps)[number]) => ({ id: f.id, subject: f.personName, status: f.status })),
   });
 
   return (

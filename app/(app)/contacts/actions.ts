@@ -45,9 +45,9 @@ export async function summarizeRelationshipAction(id: string) {
       company: contact.company,
       notes: contact.notes,
       lastInteraction: contact.lastInteraction,
-      openTasks: contact.tasks.filter((t) => t.status !== TaskStatus.DONE).length,
-      openFollowUps: contact.followUps.filter((f) => f.status === FollowUpStatus.PENDING || f.status === FollowUpStatus.WAITING).length,
-      recentEmailSubjects: contact.emails.map((e) => e.subject),
+      openTasks: contact.tasks.filter((t: (typeof contact.tasks)[number]) => t.status !== TaskStatus.DONE).length,
+      openFollowUps: contact.followUps.filter((f: (typeof contact.followUps)[number]) => f.status === FollowUpStatus.PENDING || f.status === FollowUpStatus.WAITING).length,
+      recentEmailSubjects: contact.emails.map((e: (typeof contact.emails)[number]) => e.subject),
     },
     (user?.aiProvider as never) ?? "mock"
   );

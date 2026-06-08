@@ -72,7 +72,7 @@ export async function prepareForMeetingAction(id: string) {
       startsAt: event.startsAt,
       attendees: event.attendees,
       description: event.description,
-      relatedNotes: event.meetingNotes.map((n) => n.title),
+      relatedNotes: event.meetingNotes.map((n: (typeof event.meetingNotes)[number]) => n.title),
     },
     provider
   );
