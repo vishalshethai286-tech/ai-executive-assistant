@@ -25,7 +25,7 @@ export default async function AdminPage() {
 
   return (
     <AdminBoard
-      users={users.map((u) => ({
+      users={users.map((u: (typeof users)[number]) => ({
         id: u.id,
         name: u.name,
         email: u.email,
@@ -34,7 +34,7 @@ export default async function AdminPage() {
         createdAt: u.createdAt.toISOString(),
       }))}
       userCount={userCount}
-      aiLogs={aiLogs.map((l) => ({
+      aiLogs={aiLogs.map((l: (typeof aiLogs)[number]) => ({
         id: l.id,
         function: l.function,
         provider: l.provider,
@@ -45,7 +45,7 @@ export default async function AdminPage() {
         error: l.error,
         createdAt: l.createdAt.toISOString(),
       }))}
-      commandLogs={commandLogs.map((c) => ({
+      commandLogs={commandLogs.map((c: (typeof commandLogs)[number]) => ({
         id: c.id,
         rawCommand: c.rawCommand,
         parsedIntent: c.parsedIntent,
@@ -53,13 +53,13 @@ export default async function AdminPage() {
         success: c.success,
         createdAt: c.createdAt.toISOString(),
       }))}
-      integrations={integrations.map((i) => ({
+      integrations={integrations.map((i: (typeof integrations)[number]) => ({
         provider: i.provider,
         status: i.status,
         lastSyncedAt: i.lastSyncedAt ? i.lastSyncedAt.toISOString() : null,
       }))}
       dbHealthy={dbHealthy}
-      recentErrors={failedAILogs.map((l) => ({
+      recentErrors={failedAILogs.map((l: (typeof failedAILogs)[number]) => ({
         id: l.id,
         source: l.function,
         message: l.error ?? "Unknown error",
