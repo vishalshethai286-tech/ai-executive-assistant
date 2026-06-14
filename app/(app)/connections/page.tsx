@@ -19,6 +19,8 @@ export default async function ConnectionsPage() {
       configured: def.configured(),
       status: account?.status ?? "disconnected",
       lastSyncedAt: account?.lastSyncedAt ? account.lastSyncedAt.toISOString() : null,
+      helpSteps: def.helpSteps,
+      helpUrl: def.helpUrl,
     };
   });
 

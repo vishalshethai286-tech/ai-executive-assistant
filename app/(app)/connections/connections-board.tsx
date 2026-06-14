@@ -9,20 +9,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { Mail, Calendar, MessageSquare, Sparkles, Plug, CheckCircle2 } from "lucide-react";
+import { Mail, Calendar, MessageSquare, Sparkles, Plug, CheckCircle2, HelpCircle, CreditCard, BookOpen, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { connectIntegrationAction, disconnectIntegrationAction } from "./actions";
 
 export interface ConnectionItem {
   provider: string;
   label: string;
-  category: "Email" | "Calendar" | "Messaging" | "Productivity" | "AI";
+  category: "Email" | "Calendar" | "Messaging" | "Productivity" | "Finance" | "Knowledge" | "AI";
   description: string;
   authType: "oauth" | "token";
   fields: { key: string; label: string; placeholder?: string; secret?: boolean }[];
   configured: boolean;
   status: string;
   lastSyncedAt: string | null;
+  helpSteps: string[];
+  helpUrl?: string;
 }
 
 const categoryIcons: Record<ConnectionItem["category"], typeof Mail> = {
@@ -30,10 +32,12 @@ const categoryIcons: Record<ConnectionItem["category"], typeof Mail> = {
   Calendar: Calendar,
   Messaging: MessageSquare,
   Productivity: Sparkles,
+  Finance: CreditCard,
+  Knowledge: BookOpen,
   AI: Sparkles,
 };
 
-const categories: ConnectionItem["category"][] = ["Email", "Calendar", "Messaging", "Productivity"];
+const categories: ConnectionItem["category"][] = ["Email", "Calendar", "Messaging", "Productivity", "Finance", "Knowledge"];
 
 export function ConnectionsBoard({ items }: { items: ConnectionItem[] }) {
   const [pending, startTransition] = useTransition();
@@ -127,19 +131,56 @@ function ConnectionCard({
                 : "Not configured — using mock data"
               : "Add your credentials to connect"}
         </p>
-        {isConnected ? (
-          <Button type="button" variant="outline" size="sm" onClick={() => onDisconnect(item.provider)} disabled={pending}>
-            Disconnect
-          </Button>
-        ) : item.authType === "token" ? (
-          <ConnectDialog item={item} />
-        ) : (
-          <Button type="button" variant="outline" size="sm" disabled={!item.configured}>
-            Connect
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <HelpDialog item={item} />
+          {isConnected ? (
+            <Button type="button" variant="outline" size="sm" onClick={() => onDisconnect(item.provider)} disabled={pending}>
+              Disconnect
+            </Button>
+          ) : item.authType === "token" ? (
+            <ConnectDialog item={item} />
+          ) : (
+            <Button type="button" variant="outline" size="sm" disabled={!item.configured}>
+              Connect
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
+  );
+}
+
+function HelpDialog({ item }: { item: ConnectionItem }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button type="button" variant="ghost" size="sm" aria-label={`How to connect ${item.label}`}>
+          <HelpCircle className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>How to connect {item.label}</DialogTitle>
+        </DialogHeader>
+        <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
+          {item.helpSteps.map((step, i) => (
+            <li key={i}>{step}</li>
+          ))}
+        </ol>
+        {item.helpUrl && (
+          <a
+            href={item.helpUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1 text-sm text-primary underline"
+          >
+            Open documentation <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
