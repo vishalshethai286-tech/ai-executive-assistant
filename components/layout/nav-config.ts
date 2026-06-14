@@ -9,6 +9,7 @@ import {
   StickyNote,
   Brain,
   Bell,
+  Plug,
   Settings,
   ShieldCheck,
   type LucideIcon,
@@ -32,6 +33,7 @@ export const navItems: NavItem[] = [
   { href: "/notes", label: "Notes", icon: StickyNote },
   { href: "/memory", label: "Memory", icon: Brain },
   { href: "/notifications", label: "Notifications", icon: Bell },
+  { href: "/connections", label: "Connections", icon: Plug },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/admin", label: "Admin", icon: ShieldCheck, adminOnly: true },
 ];

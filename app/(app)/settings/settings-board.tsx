@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Plug, Sparkles, ShieldCheck, CreditCard, Bell, Lock } from "lucide-react";
-import { updateProfileAction, disconnectIntegrationAction } from "./actions";
+import { updateProfileAction } from "./actions";
 import { ProfileInput } from "@/lib/validators";
 import { toast } from "sonner";
 
@@ -24,13 +24,6 @@ export interface ProfileData {
   aiProvider: ProfileInput["aiProvider"];
 }
 
-export interface IntegrationData {
-  provider: string;
-  label: string;
-  status: string;
-  available: boolean;
-}
-
 export interface ProviderData {
   value: ProfileInput["aiProvider"];
   label: string;
@@ -39,11 +32,9 @@ export interface ProviderData {
 
 export function SettingsBoard({
   profile,
-  integrations,
   providers,
 }: {
   profile: ProfileData;
-  integrations: IntegrationData[];
   providers: ProviderData[];
 }) {
   const [values, setValues] = useState(profile);
@@ -65,14 +56,6 @@ export function SettingsBoard({
       } catch {
         toast.error("Couldn't save your settings");
       }
-    });
-  }
-
-  function handleDisconnect(provider: string) {
-    startTransition(async () => {
-      await disconnectIntegrationAction(provider);
-      toast.success("Integration disconnected");
-      router.refresh();
     });
   }
 
@@ -110,27 +93,14 @@ export function SettingsBoard({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Plug className="h-4 w-4" /> Connected accounts</CardTitle>
-            <CardDescription>Sync your inbox and calendar for richer AI context. Without a connection, the assistant uses realistic sample data.</CardDescription>
+            <CardDescription>Sync your inbox, calendar, messaging, and productivity tools for richer AI context.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {integrations.map((i) => (
-              <div key={i.provider} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-                <div>
-                  <p className="text-sm font-medium">{i.label}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {i.available ? "Credentials detected in environment" : "Not configured — using mock data"}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={i.status === "connected" ? "default" : "secondary"}>{i.status}</Badge>
-                  {i.status === "connected" && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleDisconnect(i.provider)} disabled={pending}>
-                      Disconnect
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Manage Gmail, Calendar, Slack, WhatsApp, and other integrations from the{" "}
+              <a className="text-primary underline" href="/connections">Connections</a> page. Without a connection,
+              the assistant uses realistic sample data.
+            </p>
           </CardContent>
         </Card>
 
