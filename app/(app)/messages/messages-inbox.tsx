@@ -7,11 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import {
   MessageSquare,
   Send,
   Sparkles,
   Hash,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -58,6 +61,8 @@ export function MessagesInbox() {
   const [thread, setThread] = useState<ThreadMessage[]>([]);
   const [reply, setReply] = useState("");
   const [filter, setFilter] = useState<string>("all");
+  const [tone, setTone] = useState<string>("Professional");
+  const [composeOpen, setComposeOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -94,11 +99,11 @@ export function MessagesInbox() {
     });
   }
 
-  function handleAIDraft() {
+  function handleAIDraft(overrideTone?: string, overrideContext?: string) {
     if (!selectedConv || thread.length === 0) return;
     startTransition(async () => {
       try {
-        const lastMsgs = thread
+        const lastMsgs = overrideContext ?? thread
           .slice(-5)
           .map((m) => `${m.senderName}: ${m.body}`)
           .join("\n");
@@ -106,8 +111,10 @@ export function MessagesInbox() {
           selectedConv.channel,
           selectedConv.senderName,
           lastMsgs,
+          (overrideTone ?? tone) as any,
         );
         setReply(result.draft);
+        setComposeOpen(true);
       } catch {
         toast.error("Couldn't generate a draft");
       }
@@ -237,12 +244,52 @@ export function MessagesInbox() {
                   ))}
                 </div>
 
-                {/* Reply bar */}
-                <div className="border-t border-border px-4 py-3">
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={handleAIDraft} disabled={pending}>
-                      <Sparkles className="h-3.5 w-3.5" />
-                    </Button>
+                {/* Smart Compose Reply Bar */}
+                <div className="border-t border-border">
+                  {/* Quick replies + expand toggle */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto px-4 py-2">
+                    <button
+                      onClick={() => setComposeOpen(!composeOpen)}
+                      className="shrink-0 rounded-md border border-border p-1 text-muted-foreground hover:bg-accent"
+                    >
+                      {composeOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronUp className="h-3.5 w-3.5" />}
+                    </button>
+                    {quickReplies.map((qr) => (
+                      <button
+                        key={qr.label}
+                        disabled={pending}
+                        onClick={() => handleAIDraft(qr.tone, `${thread.slice(-3).map((m) => `${m.senderName}: ${m.body}`).join("\n")}\n\nInstruction: ${qr.instruction}`)}
+                        className="shrink-0 rounded-full border border-border bg-secondary px-2.5 py-1 text-[11px] font-medium text-secondary-foreground transition-colors hover:bg-accent disabled:opacity-50"
+                      >
+                        {qr.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Expanded compose area */}
+                  {composeOpen && (
+                    <div className="space-y-2 border-t border-border px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">Tone</span>
+                        <Select value={tone} onValueChange={setTone}>
+                          <SelectTrigger className="h-7 w-32 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tones.map((t) => (
+                              <SelectItem key={t} value={t}>{t}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => handleAIDraft()} disabled={pending}>
+                          <Sparkles className="h-3 w-3" /> AI Draft
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Message input */}
+                  <div className="flex gap-2 px-4 py-2">
                     <Input
                       value={reply}
                       onChange={(e) => setReply(e.target.value)}
@@ -266,3 +313,16 @@ export function MessagesInbox() {
     </div>
   );
 }
+
+const tones = ["Professional", "Friendly", "Short", "Firm", "Detailed"] as const;
+
+const quickReplies = [
+  { label: "👍 Acknowledge", instruction: "Acknowledge their message briefly and say you'll follow up", tone: "Professional" },
+  { label: "✅ Confirm", instruction: "Confirm and agree with what they said", tone: "Friendly" },
+  { label: "📅 Schedule", instruction: "Suggest scheduling a time to discuss", tone: "Friendly" },
+  { label: "⏳ Buy time", instruction: "Say you need a bit more time and will get back to them", tone: "Professional" },
+  { label: "❓ Ask more", instruction: "Ask for more details or clarification", tone: "Professional" },
+  { label: "🙏 Thank", instruction: "Thank them warmly", tone: "Friendly" },
+  { label: "🔄 Follow up", instruction: "Follow up on the previous topic and ask for an update", tone: "Professional" },
+  { label: "👋 Close", instruction: "Wrap up the conversation politely", tone: "Short" },
+];
