@@ -9,6 +9,7 @@ import { summarizeEmail, draftEmailReply, ReplyTone } from "@/lib/ai/aiService";
 import { logAIActivity } from "@/services/aiLogService";
 import { prisma } from "@/lib/db/prisma";
 import { TaskCategory, Priority } from "@prisma/client";
+import { sendEmail, isEmailSendingConfigured } from "@/lib/email/sendEmail";
 
 async function getEmailOrThrow(userId: string, id: string) {
   return prisma.emailMessage.findFirstOrThrow({ where: { id, userId } });
@@ -113,4 +114,25 @@ export async function convertToFollowUpAction(id: string) {
   await setLabelAction(id, "follow_up_needed");
   revalidatePath("/follow-ups");
   return followUp;
+}
+
+export async function checkEmailSendingAction() {
+  const userId = await requireUserId();
+  return isEmailSendingConfigured(userId);
+}
+
+export async function sendReplyAction(emailId: string, body: string) {
+  const userId = await requireUserId();
+  const email = await getEmailOrThrow(userId, emailId);
+
+  const result = await sendEmail(userId, {
+    to: email.fromEmail,
+    subject: email.subject.startsWith("Re:") ? email.subject : `Re: ${email.subject}`,
+    body,
+  });
+
+  await emailService.setEmailLabel(userId, emailId, "waiting_reply");
+
+  revalidatePath("/emails");
+  return { messageId: result.messageId };
 }

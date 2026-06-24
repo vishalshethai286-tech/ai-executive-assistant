@@ -69,6 +69,30 @@ export const connectionRegistry: ConnectionDefinition[] = [
     ],
   },
 
+  {
+    provider: "smtp_email",
+    label: "SMTP Email (Send)",
+    category: "Email",
+    description: "Send emails directly from the app using any SMTP server (Gmail, Outlook, custom).",
+    authType: "token",
+    fields: [
+      { key: "host", label: "SMTP Host", placeholder: "smtp.gmail.com" },
+      { key: "port", label: "SMTP Port", placeholder: "587" },
+      { key: "user", label: "Email / Username", placeholder: "you@example.com" },
+      { key: "pass", label: "Password / App Password", placeholder: "App password", secret: true },
+      { key: "from", label: "From Address (optional)", placeholder: "you@example.com" },
+    ],
+    configured: () => Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS),
+    helpUrl: "https://support.google.com/accounts/answer/185833",
+    helpSteps: [
+      "For Gmail: go to Google Account → Security → 2-Step Verification → App passwords, then generate an App password.",
+      "For Outlook: use smtp-mail.outlook.com as host, port 587, and your Microsoft account password.",
+      "For custom SMTP: get the host, port, username, and password from your email provider.",
+      "Enter the SMTP details below, or set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM as environment variables.",
+      "Once connected, a Send button will appear when you draft replies in the Email Assistant.",
+    ],
+  },
+
   // ---- Calendar ----
   {
     provider: "google_calendar",

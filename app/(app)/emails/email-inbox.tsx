@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,8 @@ import {
   markReadAction,
   convertToTaskAction,
   convertToFollowUpAction,
+  sendReplyAction,
+  checkEmailSendingAction,
 } from "./actions";
 import { toast } from "sonner";
 
@@ -68,8 +70,14 @@ export function EmailInbox({ emails, activeFilter, query }: { emails: EmailItem[
   const [tone, setTone] = useState<(typeof tones)[number]>("Professional");
   const [instructions, setInstructions] = useState("");
   const [draft, setDraft] = useState<string | null>(null);
+  const [canSend, setCanSend] = useState(false);
+  const [sent, setSent] = useState(false);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+
+  useEffect(() => {
+    checkEmailSendingAction().then(setCanSend).catch(() => setCanSend(false));
+  }, []);
 
   const selected = emails.find((e) => e.id === selectedId) ?? null;
 
@@ -92,6 +100,7 @@ export function EmailInbox({ emails, activeFilter, query }: { emails: EmailItem[
     setSelectedId(email.id);
     setDraft(null);
     setInstructions("");
+    setSent(false);
     if (email.isUnread) {
       startTransition(async () => {
         await markReadAction(email.id, false);
@@ -294,11 +303,44 @@ export function EmailInbox({ emails, activeFilter, query }: { emails: EmailItem[
                         className="w-full rounded-md border border-input bg-card p-3 text-sm leading-relaxed"
                         rows={6}
                         value={draft}
-                        onChange={(e) => setDraft(e.target.value)}
+                        onChange={(e) => { setDraft(e.target.value); setSent(false); }}
                       />
-                      <p className="text-xs text-muted-foreground">
-                        This draft is fully editable. The assistant never sends emails automatically — review, edit, then send from your email client.
-                      </p>
+                      <div className="flex items-center justify-between gap-2">
+                        {canSend ? (
+                          sent ? (
+                            <p className="flex items-center gap-1.5 text-sm font-medium text-green-600 dark:text-green-400">
+                              <CheckSquare className="h-3.5 w-3.5" /> Sent successfully
+                            </p>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                if (!selected || !draft) return;
+                                startTransition(async () => {
+                                  try {
+                                    await sendReplyAction(selected.id, draft);
+                                    setSent(true);
+                                    toast.success(`Reply sent to ${selected.fromEmail}`);
+                                    router.refresh();
+                                  } catch (err) {
+                                    toast.error(err instanceof Error ? err.message : "Failed to send email");
+                                  }
+                                });
+                              }}
+                              disabled={pending}
+                            >
+                              <Send className="h-3.5 w-3.5" /> Send reply
+                            </Button>
+                          )
+                        ) : (
+                          <p className="text-xs text-muted-foreground">
+                            To send from here, configure <a className="text-primary underline" href="/connections">SMTP Email</a> in Connections.
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Edit the draft above before sending.
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
