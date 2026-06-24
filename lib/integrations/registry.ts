@@ -155,6 +155,8 @@ export const connectionRegistry: ConnectionDefinition[] = [
       "Under OAuth & Permissions, add the channels:history, im:history, and chat:write scopes.",
       "Click \"Install to Workspace\" and approve the permissions.",
       "Copy the \"Bot User OAuth Token\" (starts with xoxb-) and paste it below.",
+      "Under Event Subscriptions, enable events and set Request URL to: https://your-app.vercel.app/api/webhooks/slack",
+      "Subscribe to bot events: message.im, message.channels, message.groups.",
     ],
   },
   {
@@ -174,6 +176,8 @@ export const connectionRegistry: ConnectionDefinition[] = [
       "From the WhatsApp → API Setup page, copy your Phone Number ID.",
       "Generate a temporary or permanent access token from the same page.",
       "Paste both values below and click Connect.",
+      "Set your webhook URL in Meta Developer Console to: https://your-app.vercel.app/api/webhooks/whatsapp",
+      "Set WHATSAPP_VERIFY_TOKEN env var (default: ai-exec-assistant) to match your webhook verify token.",
     ],
   },
   {
@@ -190,6 +194,7 @@ export const connectionRegistry: ConnectionDefinition[] = [
       "Send /newbot and follow the prompts to name your bot.",
       "BotFather will reply with a token like 123456:ABC-DEF... — copy it.",
       "Paste the token below and click Connect, then message your bot to start receiving alerts.",
+      "Set your Telegram webhook by opening: https://api.telegram.org/bot<YOUR_TOKEN>/setWebhook?url=https://your-app.vercel.app/api/webhooks/telegram",
     ],
   },
   {

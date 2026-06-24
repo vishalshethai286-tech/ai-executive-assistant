@@ -42,6 +42,7 @@ model User {
   memoryItems         MemoryItem[]
   notifications       Notification[]
   integrationAccounts IntegrationAccount[]
+  messages            Message[]
   commandLogs         CommandLog[]
 
   @@index([email])
@@ -259,6 +260,7 @@ model Contact {
   followUps FollowUp[]
   notes_    Note[]
   meetingNotes MeetingNote[]
+  messages  Message[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -392,6 +394,30 @@ model IntegrationAccount {
 
   @@index([userId])
   @@unique([userId, provider])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  userId      String
+  channel     String // "whatsapp" | "telegram" | "slack" | "sms"
+  externalId  String? // platform-specific message ID
+  direction   String // "inbound" | "outbound"
+  senderName  String
+  senderId    String // phone number, chat ID, user ID, etc.
+  body        String   @db.Text
+  metadata    Json? // channel-specific extra data
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, channel])
+  @@index([userId, senderId])
+  @@index([externalId])
 }
 
 model CommandLog {

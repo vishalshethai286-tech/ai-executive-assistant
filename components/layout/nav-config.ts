@@ -15,6 +15,7 @@ import {
   Sunrise,
   FileSearch,
   PenSquare,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -30,6 +31,7 @@ export const navItems: NavItem[] = [
   { href: "/briefing", label: "Daily Briefing", icon: Sunrise },
   { href: "/meeting-prep", label: "Meeting Prep", icon: FileSearch },
   { href: "/compose", label: "Smart Compose", icon: PenSquare },
+  { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/command", label: "Command Center", icon: Terminal },
   { href: "/emails", label: "Emails", icon: Mail },
   { href: "/calendar", label: "Calendar", icon: Calendar },
