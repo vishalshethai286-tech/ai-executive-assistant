@@ -12,6 +12,8 @@ import {
   Plug,
   Settings,
   ShieldCheck,
+  Sunrise,
+  FileSearch,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,6 +26,8 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/briefing", label: "Daily Briefing", icon: Sunrise },
+  { href: "/meeting-prep", label: "Meeting Prep", icon: FileSearch },
   { href: "/command", label: "Command Center", icon: Terminal },
   { href: "/emails", label: "Emails", icon: Mail },
   { href: "/calendar", label: "Calendar", icon: Calendar },

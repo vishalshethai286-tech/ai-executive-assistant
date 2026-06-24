@@ -53,6 +53,15 @@ const filters = [
 
 const tones = ["Professional", "Friendly", "Short", "Firm", "Detailed"] as const;
 
+const quickReplies = [
+  { label: "Acknowledge", instruction: "Acknowledge receipt and say I'll review shortly", tone: "Professional" as const },
+  { label: "Accept", instruction: "Accept the request and confirm next steps", tone: "Friendly" as const },
+  { label: "Decline politely", instruction: "Politely decline, suggest an alternative", tone: "Professional" as const },
+  { label: "Request more info", instruction: "Ask for more details before I can proceed", tone: "Professional" as const },
+  { label: "Schedule a call", instruction: "Suggest scheduling a call to discuss further", tone: "Friendly" as const },
+  { label: "Delegate", instruction: "Say I'll forward this to the right person on my team", tone: "Professional" as const },
+];
+
 export function EmailInbox({ emails, activeFilter, query }: { emails: EmailItem[]; activeFilter: string; query: string }) {
   const [selectedId, setSelectedId] = useState<string | null>(emails[0]?.id ?? null);
   const [search, setSearch] = useState(query);
@@ -103,11 +112,13 @@ export function EmailInbox({ emails, activeFilter, query }: { emails: EmailItem[
     });
   }
 
-  function handleDraftReply() {
+  function handleDraftReply(overrideTone?: string, overrideInstructions?: string) {
     if (!selected) return;
+    const useTone = (overrideTone ?? tone) as (typeof tones)[number];
+    const useInstructions = overrideInstructions ?? instructions;
     startTransition(async () => {
       try {
-        const res = await draftReplyAction(selected.id, tone, instructions || undefined);
+        const res = await draftReplyAction(selected.id, useTone, useInstructions || undefined);
         setDraft(res.draft);
       } catch {
         toast.error("Couldn't draft a reply");
@@ -244,6 +255,20 @@ export function EmailInbox({ emails, activeFilter, query }: { emails: EmailItem[
                   <p className="flex items-center gap-1.5 text-sm font-medium">
                     <Send className="h-4 w-4" /> Draft a reply
                   </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {quickReplies.map((qr) => (
+                      <Button
+                        key={qr.label}
+                        variant="secondary"
+                        size="sm"
+                        className="text-xs"
+                        disabled={pending}
+                        onClick={() => handleDraftReply(qr.tone, qr.instruction)}
+                      >
+                        {qr.label}
+                      </Button>
+                    ))}
+                  </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs text-muted-foreground">Tone</span>
                     <Select value={tone} onValueChange={(v) => setTone(v as never)}>
@@ -260,7 +285,7 @@ export function EmailInbox({ emails, activeFilter, query }: { emails: EmailItem[
                     onChange={(e) => setInstructions(e.target.value)}
                     placeholder="Optional instructions, e.g. 'say I'll review tomorrow'"
                   />
-                  <Button size="sm" onClick={handleDraftReply} disabled={pending}>
+                  <Button size="sm" onClick={() => handleDraftReply()} disabled={pending}>
                     <Sparkles className="h-3.5 w-3.5" /> Draft reply
                   </Button>
                   {draft && (
