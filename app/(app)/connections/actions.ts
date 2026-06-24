@@ -5,6 +5,7 @@ import { requireUserId } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { Prisma } from "@prisma/client";
 import { getConnectionDefinition } from "@/lib/integrations/registry";
+import { syncProvider, syncAllConnected } from "@/lib/integrations/syncAll";
 
 /** Connects a token-based integration (Slack, WhatsApp, Zoom, Notion, ...) using user-supplied credentials. */
 export async function connectIntegrationAction(provider: string, fields: Record<string, string>) {
@@ -39,4 +40,29 @@ export async function disconnectIntegrationAction(provider: string) {
 
   revalidatePath("/connections");
   revalidatePath("/settings");
+}
+
+export async function syncIntegrationAction(provider: string) {
+  const userId = await requireUserId();
+  const result = await syncProvider(userId, provider);
+  revalidatePath("/connections");
+  revalidatePath("/emails");
+  revalidatePath("/calendar");
+  revalidatePath("/tasks");
+  revalidatePath("/notes");
+  revalidatePath("/notifications");
+  return result;
+}
+
+export async function syncAllAction() {
+  const userId = await requireUserId();
+  const results = await syncAllConnected(userId);
+  revalidatePath("/connections");
+  revalidatePath("/emails");
+  revalidatePath("/calendar");
+  revalidatePath("/tasks");
+  revalidatePath("/notes");
+  revalidatePath("/notifications");
+  revalidatePath("/dashboard");
+  return results;
 }
