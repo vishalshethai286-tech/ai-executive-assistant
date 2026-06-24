@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Sunrise,
   FileSearch,
+  PenSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ export const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/briefing", label: "Daily Briefing", icon: Sunrise },
   { href: "/meeting-prep", label: "Meeting Prep", icon: FileSearch },
+  { href: "/compose", label: "Smart Compose", icon: PenSquare },
   { href: "/command", label: "Command Center", icon: Terminal },
   { href: "/emails", label: "Emails", icon: Mail },
   { href: "/calendar", label: "Calendar", icon: Calendar },

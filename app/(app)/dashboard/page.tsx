@@ -10,6 +10,7 @@ import { getUrgentEmails } from "@/services/emailService";
 import { getOverdueTasks, getTodayTasks } from "@/services/taskService";
 import { getFollowUpsDueToday, getOverdueFollowUps } from "@/services/followUpService";
 import { BriefingCard } from "./briefing-card";
+import { SyncButton } from "./sync-button";
 import { priorityBadgeVariant } from "@/components/tasks/badges";
 
 export default async function DashboardPage() {
@@ -37,6 +38,7 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-semibold">Good to see you 👋</h1>
           <p className="text-sm text-muted-foreground">Here's your command center for today.</p>
         </div>
+        <SyncButton />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
