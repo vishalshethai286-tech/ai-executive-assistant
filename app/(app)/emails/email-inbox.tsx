@@ -16,6 +16,8 @@ import {
   CheckSquare,
   Repeat,
   Send,
+  Info,
+  ArrowRight,
 } from "lucide-react";
 import {
   summarizeEmailAction,
@@ -305,9 +307,9 @@ export function EmailInbox({ emails, activeFilter, query }: { emails: EmailItem[
                         value={draft}
                         onChange={(e) => { setDraft(e.target.value); setSent(false); }}
                       />
-                      <div className="flex items-center justify-between gap-2">
-                        {canSend ? (
-                          sent ? (
+                      {canSend ? (
+                        <div className="flex items-center justify-between gap-2">
+                          {sent ? (
                             <p className="flex items-center gap-1.5 text-sm font-medium text-green-600 dark:text-green-400">
                               <CheckSquare className="h-3.5 w-3.5" /> Sent successfully
                             </p>
@@ -331,16 +333,35 @@ export function EmailInbox({ emails, activeFilter, query }: { emails: EmailItem[
                             >
                               <Send className="h-3.5 w-3.5" /> Send reply
                             </Button>
-                          )
-                        ) : (
+                          )}
                           <p className="text-xs text-muted-foreground">
-                            To send from here, configure <a className="text-primary underline" href="/connections">SMTP Email</a> in Connections.
+                            Edit the draft above before sending.
                           </p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          Edit the draft above before sending.
-                        </p>
-                      </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/40">
+                          <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-blue-800 dark:text-blue-300">
+                            <Info className="h-4 w-4" /> Set up email sending to send replies from this app
+                          </p>
+                          <ol className="mb-3 list-decimal space-y-1 pl-5 text-xs text-blue-700 dark:text-blue-400">
+                            <li>Go to <a className="font-medium underline" href="/connections">Connections</a> and find <strong>SMTP Email (Send)</strong></li>
+                            <li>Click <strong>Connect</strong> and enter your SMTP credentials:</li>
+                            <li className="ml-2 list-none">
+                              <span className="font-medium">Gmail:</span> Host <code className="rounded bg-blue-100 px-1 dark:bg-blue-900">smtp.gmail.com</code>, Port <code className="rounded bg-blue-100 px-1 dark:bg-blue-900">587</code>, your Gmail address, and a <a className="font-medium underline" href="https://support.google.com/accounts/answer/185833" target="_blank" rel="noreferrer">Google App Password</a>
+                            </li>
+                            <li className="ml-2 list-none">
+                              <span className="font-medium">Outlook:</span> Host <code className="rounded bg-blue-100 px-1 dark:bg-blue-900">smtp-mail.outlook.com</code>, Port <code className="rounded bg-blue-100 px-1 dark:bg-blue-900">587</code>, your Microsoft email + password
+                            </li>
+                            <li>Once connected, a <strong>Send reply</strong> button will appear here</li>
+                          </ol>
+                          <a
+                            href="/connections"
+                            className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700"
+                          >
+                            Go to Connections <ArrowRight className="h-3 w-3" />
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
